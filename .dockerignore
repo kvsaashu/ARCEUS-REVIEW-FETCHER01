@@ -1,0 +1,17 @@
+__pycache__
+*.pyc
+*.pyo
+*.pyd
+.git
+.gitignore
+cloudflared.exe
+*.png
+*.jpg
+scratch/
+test_*.py
+scratch_*.py
+debug_*.py
+inspect_*.py
+find_*.py
+screenshot_ui.py
+.env

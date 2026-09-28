@@ -1,0 +1,595 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=5.0, viewport-fit=cover">
+  <title>ARCEUS REVIEW FETCHER — AutoFetch System</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@300;400;500;600;700;800&display=swap" rel="stylesheet">
+  <link rel="manifest" href="/static/manifest.json">
+  <meta name="theme-color" content="#06090e">
+  <meta name="apple-mobile-web-app-capable" content="yes">
+  <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
+  <meta name="apple-mobile-web-app-title" content="Arceus PRO">
+  <link rel="icon" type="image/png" href="/static/icons/favicon.png?v=3.0">
+  <link rel="shortcut icon" href="/static/favicon.ico?v=3.0">
+  <link rel="apple-touch-icon" href="/static/icons/icon-192.png?v=3.0">
+  <link rel="stylesheet" href="/static/css/style.css?v=4.8">
+</head>
+<body>
+
+  <!-- WebGL 3D Interactive Canvas -->
+  <canvas id="bg3dCanvas" class="bg-3d-canvas"></canvas>
+
+  <!-- Ambient Animated Background -->
+  <div class="ambient-glow-mesh">
+    <div class="glow-orb orb-gold"></div>
+    <div class="glow-orb orb-cyan"></div>
+    <div class="glow-orb orb-emerald"></div>
+    <div class="cyber-grid"></div>
+  </div>
+
+  <!-- Top Navigation Bar -->
+  <header class="topbar">
+    <div class="brand">
+      <div class="logo-box" title="Arceus Nest — AutoFetch System">
+        <img src="/static/icons/logo.png?v=3.0" alt="Arceus Nest Logo" class="brand-logo-img">
+        <div class="logo-sheen"></div>
+      </div>
+      <div class="brand-text">
+        <div class="brand-title-wrap">
+          <h1>Arceus Review Fetcher</h1>
+          <span class="pro-badge">ARCEUS NEST</span>
+        </div>
+        <p>AutoFetch &amp; Comment Verification System • By Aashu Rajput</p>
+      </div>
+    </div>
+
+    <div class="topbar-actions">
+      <!-- PWA Install Button -->
+      <button type="button" class="btn-gold-sm hidden" id="installPwaBtn" title="Install App on Phone / Desktop">
+        📲 Install App
+      </button>
+
+      <!-- Cloud Remote Active Badge (3D Cyber Holographic Pill) -->
+      <div class="status-badge badge-cyan hidden" id="topbarTunnelBadge" style="cursor: pointer;" title="Cloud Remote Access is Active — Click to view / copy live link">
+        <span class="cloud-globe-pulse">🌐</span> <span class="badge-text">Cloud Active</span>
+      </div>
+
+      <div class="status-indicator">
+        <span class="pulse-dot"></span>
+        <span class="status-text" id="statusLabel">SYSTEM ONLINE</span>
+      </div>
+      <button type="button" class="btn-ghost" id="toggle3dBtn" title="Toggle 3D Visual Effects">
+        ✨ 3D Mode: ON
+      </button>
+      <button class="btn-ghost" id="openSettingsBtn" title="Integrations & Settings">
+        ⚙️ Settings
+      </button>
+    </div>
+  </header>
+
+  <!-- Main Container -->
+  <main class="dashboard-container" id="mainDashboard">
+    
+    <!-- Left Sidebar: Controls -->
+    <aside class="sidebar-panel">
+      <!-- Mode Switcher -->
+      <div class="mode-switcher">
+        <button class="mode-tab active" id="tabApp" data-mode="APP">
+          📱 App
+        </button>
+        <button class="mode-tab" id="tabMap" data-mode="MAP">
+          📍 Map
+        </button>
+        <button class="mode-tab" id="tabBulk" data-mode="BULK">
+          🗂️ Bulk
+        </button>
+        <button class="mode-tab" id="tabSchedule" data-mode="SCHEDULE">
+          📅 7-Day Auto-TG
+        </button>
+      </div>
+
+      <form id="fetchForm">
+        <!-- Single Target Input -->
+        <div class="form-group" id="singleTargetGroup">
+          <label id="targetLabel" for="targetId">Target Package ID</label>
+          <input type="text" id="targetId" placeholder="e.g. com.whatsapp or App URL">
+          <small class="field-hint">Enter Google Play Store package ID or Play Store link.</small>
+        </div>
+
+        <!-- Bulker / Mark Name Input (Shown in Schedule Mode) -->
+        <div class="form-group hidden" id="bulkerNameGroup">
+          <label for="bulkerName">🏷️ Bulker Name / Mark</label>
+          <input type="text" id="bulkerName" placeholder="e.g. John, Team A, Bulker 1, #Mark">
+          <small class="field-hint">Identify which bulker or client gave this app/task.</small>
+        </div>
+
+        <!-- Bulk Targets Input (Shown in Bulk Mode) -->
+        <div class="form-group hidden" id="bulkTargetGroup">
+          <label for="targetBulkList">Targets List (1 Target Per Line)</label>
+          <textarea id="targetBulkList" rows="4" placeholder="Enter package IDs or Google Maps links (one per line):&#10;com.whatsapp&#10;https://maps.app.goo.gl/xxx&#10;com.instagram.android"></textarea>
+          <small class="field-hint">Mixed targets supported. Play Store apps and Google Maps links are automatically detected!</small>
+        </div>
+
+        <!-- Date & Rating Row -->
+        <div class="form-row">
+          <!-- Play Store Calendar Date (Shown in APP Mode) -->
+          <div class="form-group flex-1" id="appDateGroup">
+            <label for="searchDate" id="searchDateLabel">Target Date</label>
+            <input type="date" id="searchDate" required>
+          </div>
+
+          <!-- Google Maps Relative Timeframe Selector (Shown in MAP Mode) -->
+          <div class="form-group flex-1 hidden" id="mapTimeGroup">
+            <label for="mapTimeSelect">📍 Review Time (Google Maps)</label>
+            <select id="mapTimeSelect">
+              <option value="ALL" selected>🌟 All Time (Sabhi Reviews)</option>
+              <option value="3 hours ago">⚡ 3 Hours ago / Today / Just now</option>
+              <option value="1-3 days">📅 1-3 Days ago (Yesterday - 3 Days)</option>
+              <option value="4 days ago">📅 4 Days ago</option>
+              <option value="5-7 days">📅 5-7 Days ago / 1 Week</option>
+              <option value="1 week ago">📅 1 Week ago</option>
+              <option value="2 weeks ago">📅 2 Weeks ago</option>
+              <option value="3 weeks ago">📅 3 Weeks ago</option>
+              <option value="a month ago">🌙 a month ago (1 Month)</option>
+              <option value="2 months ago">🌙 2 months ago (2 Months)</option>
+              <option value="3 months ago">🌙 3 months ago (3 Months)</option>
+              <option value="6 months ago">🌙 6 months ago</option>
+              <option value="a year ago">🗓️ a year ago (1 Year)</option>
+              <option value="CUSTOM">📆 Select Calendar Date</option>
+            </select>
+          </div>
+
+          <div class="form-group flex-1" id="ratingGroup">
+            <label for="ratingSelect">Star Rating</label>
+            <select id="ratingSelect">
+              <option value="">All Stars</option>
+              <option value="5" selected>⭐⭐⭐⭐⭐ (5)</option>
+              <option value="4">⭐⭐⭐⭐ (4)</option>
+              <option value="3">⭐⭐⭐ (3)</option>
+              <option value="2">⭐⭐ (2)</option>
+              <option value="1">⭐ (1)</option>
+            </select>
+          </div>
+          <div class="form-group flex-1 hidden" id="customCheckDateGroup">
+            <label for="customCheckDate">📅 Auto-Check Date (Custom)</label>
+            <input type="date" id="customCheckDate">
+            <div class="chips-container" style="margin-top: 4px;">
+              <button type="button" class="chip day-chip" data-days="3">3 Days</button>
+              <button type="button" class="chip day-chip" data-days="5">5 Days</button>
+              <button type="button" class="chip day-chip active-chip" data-days="7">7 Days (Main)</button>
+              <button type="button" class="chip day-chip" data-days="8">8 Days</button>
+              <button type="button" class="chip day-chip" data-days="15">15 Days</button>
+              <button type="button" class="chip day-chip" data-days="30">30 Days</button>
+            </div>
+          </div>
+        </div>
+
+        <!-- Google Maps Quick Time Chips (Shown in MAP Mode) -->
+        <div class="chips-container hidden" id="mapTimeChips" style="margin-top: -14px; margin-bottom: 22px;">
+          <span class="chip-label">Maps Time:</span>
+          <button type="button" class="chip map-chip active-chip" data-time="ALL">All Time</button>
+          <button type="button" class="chip map-chip" data-time="3 hours ago">3 hours ago</button>
+          <button type="button" class="chip map-chip" data-time="4 days ago">4 days ago</button>
+          <button type="button" class="chip map-chip" data-time="1 week ago">1 week ago</button>
+          <button type="button" class="chip map-chip" data-time="2 weeks ago">2 weeks ago</button>
+          <button type="button" class="chip map-chip" data-time="a month ago">a month ago</button>
+          <button type="button" class="chip map-chip" data-time="2 months ago">2 months ago</button>
+          <button type="button" class="chip map-chip" data-time="3 months ago">3 months ago</button>
+          <button type="button" class="chip map-chip" data-time="a year ago">1 year ago</button>
+        </div>
+
+        <!-- Comments & Keywords Textarea -->
+        <div class="form-group">
+          <label for="keywordText">Search Comments / Keywords / Symbols</label>
+          <textarea id="keywordText" rows="4" placeholder="Enter keywords (one per line) or symbols:&#10;payment&#10;login&#10;..&#10;!"></textarea>
+          
+          <!-- Quick symbol chips -->
+          <div class="chips-container">
+            <span class="chip-label">Quick:</span>
+            <button type="button" class="chip" data-val=".">.</button>
+            <button type="button" class="chip" data-val="..">..</button>
+            <button type="button" class="chip" data-val="...">...</button>
+            <button type="button" class="chip" data-val="!">!</button>
+            <button type="button" class="chip" data-val="smooth">smooth</button>
+            <button type="button" class="chip" data-val="payment">payment</button>
+          </div>
+        </div>
+
+        <!-- Dedicated Ending Hint Input -->
+        <div class="form-group" id="endingHintGroup">
+          <label for="endingHintInput">🎯 Review Last / Ending Hint (Jo review ke aakhiri me rehta hai)</label>
+          <input type="text" id="endingHintInput" placeholder="e.g. .. ya ! ya #AR ya specific last word/symbol">
+          <small class="field-hint">Reviews ke aakhiri (last) me jo symbol, dots (..), ya code rehta hai wo same match ho jayega.</small>
+          <div class="chips-container" style="margin-top: 6px;">
+            <span class="chip-label">Quick Hints:</span>
+            <button type="button" class="chip hint-chip" data-hint="..">..</button>
+            <button type="button" class="chip hint-chip" data-hint="...">...</button>
+            <button type="button" class="chip hint-chip" data-hint=".">.</button>
+            <button type="button" class="chip hint-chip" data-hint="!">!</button>
+            <button type="button" class="chip hint-chip" data-hint="??">??</button>
+            <button type="button" class="chip hint-chip" data-hint="#AR">#AR</button>
+          </div>
+        </div>
+
+        <!-- Member Roster / Reviewer Names Filter (Directly Accessible) -->
+        <div class="form-group" id="membersGroup">
+          <label for="membersText">👤 Search by Reviewer Name(s) (Optional)</label>
+          <textarea id="membersText" rows="2" placeholder="Paste reviewer profile name(s), one per line:&#10;Aditya Raj&#10;Pooja Singh"></textarea>
+          <small class="field-hint">Matches reviews written by these Google profile names.</small>
+        </div>
+
+        <!-- Matching Rules -->
+        <div class="options-group">
+          <label class="checkbox-container" for="exactWordCheck">
+            <input type="checkbox" id="exactWordCheck" checked>
+            <span class="checkbox-label-text">Exact 100% comment match (Strict word-for-word for App campaigns)</span>
+          </label>
+        </div>
+
+        <!-- Action Buttons -->
+        <div class="button-stack">
+          <button type="submit" class="btn-primary" id="fetchBtn">
+            ⚡ Fetch &amp; Match Reviews
+          </button>
+          
+          <button type="button" class="btn-secondary" id="fetchAllRecentBtn" title="Fetch all recent reviews from this location without keyword or member restrictions">
+            👀 Show All Recent Reviews (No Filter)
+          </button>
+
+          <div class="autofetch-controls">
+            <div class="autofetch-row">
+              <select id="autoInterval" class="interval-select">
+                <option value="2">Every 2 mins</option>
+                <option value="5" selected>Every 5 mins</option>
+                <option value="10">Every 10 mins</option>
+                <option value="15">Every 15 mins</option>
+                <option value="30">Every 30 mins</option>
+              </select>
+              <button type="button" class="btn-secondary autofetch-btn" id="autoFetchBtn">
+                🔄 Start Auto-Fetch
+              </button>
+            </div>
+            <button type="button" class="btn-danger hidden" id="stopAutoBtn">
+              ⏹️ Stop Auto-Fetch Monitoring
+            </button>
+          </div>
+        </div>
+      </form>
+    </aside>
+
+    <!-- Right Center: Dashboard & Live Feed -->
+    <section class="content-panel">
+      <!-- Metric Cards Header -->
+      <div class="metrics-grid">
+        <div class="metric-card">
+          <span class="metric-title">Total Scanned</span>
+          <div class="metric-value" id="statScanned">0</div>
+          <small class="metric-sub">Reviews analyzed</small>
+        </div>
+
+        <div class="metric-card gold-border">
+          <span class="metric-title">Live Units Matched</span>
+          <div class="metric-value gold-glow" id="statMatched">0</div>
+          <small class="metric-sub">Verified live comments</small>
+        </div>
+
+        <div class="metric-card">
+          <span class="metric-title">Auto-Fetch Status</span>
+          <div class="metric-value status-badge" id="statAutoStatus">STANDBY</div>
+          <small class="metric-sub" id="statAutoSub">Click Start Auto-Fetch</small>
+        </div>
+
+        <div class="metric-card">
+          <span class="metric-title">Google Sheet Sync</span>
+          <div class="metric-value status-badge badge-green" id="statSheetStatus">READY</div>
+          <small class="metric-sub" id="statSheetSub">1-Click / Auto Sync</small>
+        </div>
+      </div>
+
+      <!-- App / Place Target Info Banner -->
+      <div class="target-banner hidden" id="targetBanner">
+        <img src="" alt="Target Icon" id="targetIcon" class="target-icon">
+        <div class="target-details">
+          <h2 id="targetTitle">Target Name</h2>
+          <p id="targetSub">Developer • Installs • Rating</p>
+        </div>
+        <div class="banner-stats">
+          <div class="banner-score" id="targetScore">★ 0.0</div>
+        </div>
+      </div>
+
+      <!-- Feed Controls Toolbar -->
+      <div class="feed-toolbar hidden" id="feedToolbar">
+        <div class="toolbar-left">
+          <span class="feed-count-label">Matched: <strong id="matchedHeaderCount">0</strong></span>
+          <input type="text" id="liveFeedSearch" class="live-search-input" placeholder="🔍 Quick filter on page (by comment or author)...">
+        </div>
+        <div class="toolbar-right">
+          <button class="btn-gold" id="sendTgAlertBtn">
+            🤖 Send Alert to Bot
+          </button>
+          <button class="btn-secondary" id="exportCsvBtn">
+            📥 Download CSV
+          </button>
+          <button class="btn-secondary" id="syncSheetBtn">
+            📤 Upload to Google Sheet
+          </button>
+          <button class="btn-ghost" id="copyAllBtn">
+            📋 Copy All
+          </button>
+        </div>
+      </div>
+
+      <!-- Loading State -->
+      <div class="loading-state hidden" id="loadingState">
+        <div class="holo-scanner">
+          <div class="scanner-ring ring-outer"></div>
+          <div class="scanner-ring ring-mid"></div>
+          <div class="scanner-ring ring-inner"></div>
+          <div class="scanner-core">
+            <span class="scanner-pulse-icon">⚡</span>
+          </div>
+          <div class="scanner-laser-line"></div>
+        </div>
+        <div class="scanner-text-group">
+          <h4 class="scanner-title">Active Intelligent Scan</h4>
+          <p id="loadingMsg">Scanning store reviews & running exact comment filters...</p>
+          <div class="scanner-bar-track">
+            <div class="scanner-bar-beam"></div>
+          </div>
+        </div>
+      </div>
+
+      <!-- Reviews Feed List -->
+      <div class="reviews-feed" id="reviewsFeed">
+        <div class="empty-state" id="emptyState">
+          <div class="empty-logo-wrap">
+            <img src="/static/icons/logo.png?v=3.0" alt="Arceus Nest Emblem" class="empty-brand-logo">
+          </div>
+          <h2 class="empty-title">Ready to Fetch Live Reviews</h2>
+          <p>Enter your App Package ID or Google Maps Link, select target date &amp; comments, then click <strong>Fetch Reviews Now</strong> or <strong>Start Auto-Fetch</strong>.</p>
+        </div>
+      </div>
+
+      <!-- Bulk Targets Summary Panel (Shown after Bulk Fetch) -->
+      <div class="campaigns-panel hidden" id="batchPanel">
+        <div class="panel-header">
+          <div>
+            <h2 class="panel-title">🗂️ Bulk Targets Summary</h2>
+            <p class="panel-desc">Target-by-target breakdown of all scanned links in this batch session.</p>
+          </div>
+          <div class="feed-actions">
+            <button type="button" class="btn-gold-sm" id="batchExportCsvBtn">📁 Export Combined CSV</button>
+            <button type="button" class="btn-emerald-sm" id="batchTelegramBtn">✈️ Send Batch to Telegram</button>
+          </div>
+        </div>
+
+        <div class="table-responsive">
+          <table class="campaigns-table">
+            <thead>
+              <tr>
+                <th>#</th>
+                <th>Target Name</th>
+                <th>Type</th>
+                <th>Total Scanned</th>
+                <th>Live Units</th>
+                <th>Status</th>
+              </tr>
+            </thead>
+            <tbody id="batchTableBody">
+            </tbody>
+          </table>
+        </div>
+      </div>
+
+      <!-- 8-Day Auto-Retention Campaigns Table (Shown in Schedule Mode) -->
+      <div class="campaigns-panel hidden" id="campaignsPanel">
+        <div class="panel-header">
+          <div>
+            <h2 class="panel-title">📅 Scheduled 8-Day Retention Campaigns</h2>
+            <p class="panel-desc">Tasks registered here are automatically checked on their 8th day and the verified live list + CSV is sent straight to your Telegram Bot.</p>
+          </div>
+          <button type="button" class="btn-secondary" id="refreshCampaignsBtn">🔄 Refresh List</button>
+        </div>
+
+        <div class="table-responsive">
+          <table class="campaigns-table">
+            <thead>
+              <tr>
+                <th>Target App</th>
+                <th>Bulker / Mark</th>
+                <th>List Date</th>
+                <th>8th Day (Check Date)</th>
+                <th>Countdown</th>
+                <th>Status</th>
+                <th>Actions</th>
+              </tr>
+            </thead>
+            <tbody id="campaignsTableBody">
+              <tr>
+                <td colspan="7" class="text-center py-4 text-muted">No scheduled retention tasks yet. Create one on the left!</td>
+              </tr>
+            </tbody>
+          </table>
+        </div>
+      </div>
+    </section>
+
+  </main>
+
+  <!-- Settings Modal -->
+  <div class="modal-backdrop hidden" id="settingsModal">
+    <div class="modal-box">
+      <div class="modal-header">
+        <h3>System Settings &amp; Integrations</h3>
+        <button type="button" class="btn-close" id="closeSettingsBtn">&times;</button>
+      </div>
+      <form id="settingsForm">
+        <div class="form-group">
+          <label for="sheetWebhookInput">Google Sheets Webhook URL</label>
+          <input type="url" id="sheetWebhookInput" placeholder="https://script.google.com/macros/s/.../exec">
+          <small class="field-hint">Google Apps Script Webhook URL for auto-saving matched live units.</small>
+        </div>
+
+        <div class="form-row">
+          <div class="form-group flex-1">
+            <label for="tgTokenInput">Telegram Bot Token</label>
+            <input type="text" id="tgTokenInput" placeholder="123456:ABC-DEF...">
+          </div>
+          <div class="form-group flex-1">
+            <label for="tgChatInput">Telegram Chat ID</label>
+            <input type="text" id="tgChatInput" placeholder="-100... or user ID">
+          </div>
+        </div>
+
+        <div class="form-group" style="margin-top: -8px; margin-bottom: 16px;">
+          <button type="button" class="btn-secondary" id="testTgBtn" style="font-size: 12px; padding: 6px 12px;">
+            🔔 Send Test Telegram Message
+          </button>
+          <span id="testTgResult" style="font-size: 12px; margin-left: 10px;"></span>
+        </div>
+
+        <div class="form-group">
+          <label for="placesKeyInput">Google Places API Key (Optional for Maps)</label>
+          <input type="text" id="placesKeyInput" placeholder="AIzaSy...">
+          <small class="field-hint">Used for official Google Places review pagination.</small>
+        </div>
+
+        <!-- 🔐 Admin Security ID & Password Card -->
+        <div class="security-settings-card" style="margin-top: 18px; margin-bottom: 20px; background: rgba(8, 12, 20, 0.85); border: 1px solid rgba(245, 158, 11, 0.35); border-radius: var(--radius-md); padding: 16px;">
+          <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 10px;">
+            <div>
+              <h4 style="font-size: 13.5px; font-weight: 800; color: var(--gold-bright); margin-bottom: 2px;">🔐 Admin ID &amp; Password Lock</h4>
+              <p style="font-size: 11.5px; color: var(--text-muted);">Settings is locked with ID &amp; Password to protect credentials from unauthorized users.</p>
+            </div>
+            <span id="lockStatusPill" class="status-badge badge-green" style="font-size: 11px;">PROTECTED (ID &amp; PASS)</span>
+          </div>
+
+          <div class="form-group" style="margin-bottom: 12px;">
+            <label for="adminUsernameInput">Admin ID / Username</label>
+            <input type="text" id="adminUsernameInput" placeholder="admin" autocomplete="username">
+            <small class="field-hint">Your login ID to unlock Settings (default: admin).</small>
+          </div>
+
+          <div class="form-row" style="margin-bottom: 12px;">
+            <div class="form-group flex-1">
+              <label for="adminPasswordInput">New Password</label>
+              <input type="password" id="adminPasswordInput" placeholder="Leave blank to keep unchanged" autocomplete="new-password">
+              <small class="field-hint">Leave blank to keep current password.</small>
+            </div>
+            <div class="form-group flex-1">
+              <label for="confirmAdminPasswordInput">Confirm Password</label>
+              <input type="password" id="confirmAdminPasswordInput" placeholder="Confirm new password" autocomplete="new-password">
+              <small class="field-hint">Must match password above.</small>
+            </div>
+          </div>
+
+          <div style="display: flex; gap: 10px; align-items: center; flex-wrap: wrap; margin-bottom: 14px;">
+            <button type="button" class="btn-secondary" id="toggleMaskKeysBtn" style="font-size: 11.5px; padding: 6px 12px;">
+              👁️ Show / Hide Passwords &amp; API Keys
+            </button>
+            <button type="button" class="btn-ghost" id="lockSessionNowBtn" style="font-size: 11.5px; padding: 6px 12px; color: var(--gold-bright); border: 1px dashed var(--gold-primary);">
+              🔒 Re-Lock Settings Now
+            </button>
+          </div>
+
+          <div style="border-top: 1px solid var(--border-subtle); padding-top: 12px; display: flex; flex-direction: column; gap: 10px;">
+            <span style="font-size: 11px; font-weight: 800; color: var(--gold-bright); letter-spacing: 0.5px;">SECURITY LOCK SETTINGS:</span>
+            
+            <label class="checkbox-container" style="font-size: 12.5px;">
+              <input type="checkbox" id="lockSettingsCheck" checked>
+              <span class="checkbox-label-text">🔒 <strong>Lock Settings Dialog:</strong> Require Admin ID &amp; Password whenever Settings is opened</span>
+            </label>
+
+            <label class="checkbox-container" style="font-size: 12.5px;">
+              <input type="checkbox" id="lockCampaignsCheck">
+              <span class="checkbox-label-text">🔒 <strong>Lock Campaign Deletions:</strong> Require Admin Password to delete 8-Day scheduled tasks</span>
+            </label>
+
+            <label class="checkbox-container" style="font-size: 12.5px;">
+              <input type="checkbox" id="lockTunnelCheck">
+              <span class="checkbox-label-text">🔒 <strong>Lock Cloud Access:</strong> Require Admin Password to start or stop Cloud Remote Access</span>
+            </label>
+          </div>
+        </div>
+
+        <!-- 🌐 Cloud Remote Access (Cloudflare Free Tunnel) -->
+        <div class="tunnel-settings-card" style="margin-top: 18px; margin-bottom: 20px; background: rgba(8, 12, 20, 0.85); border: 1px solid rgba(245, 158, 11, 0.35); border-radius: var(--radius-md); padding: 16px;">
+          <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 8px;">
+            <div>
+              <h4 style="font-size: 13.5px; font-weight: 800; color: var(--gold-bright); margin-bottom: 2px;">🌐 Cloud Remote Access (Free Anywhere Access)</h4>
+              <p style="font-size: 11.5px; color: var(--text-muted);">Open Arceus on any mobile phone worldwide on 4G/5G mobile data without needing same Wi-Fi.</p>
+            </div>
+            <span id="tunnelStatusBadge" class="status-badge" style="font-size: 11px;">STANDBY</span>
+          </div>
+
+          <div style="display: flex; gap: 10px; align-items: center; flex-wrap: wrap; margin-top: 10px;">
+            <button type="button" class="btn-emerald-sm" id="startTunnelBtn">🚀 Start Cloud Access</button>
+            <button type="button" class="btn-danger hidden" id="stopTunnelBtn" style="font-size: 12px; padding: 7px 14px;">⏹️ Stop Cloud Access</button>
+            <span id="tunnelSpinner" class="hidden" style="font-size: 12px; color: var(--cyan-bright);">⏳ Connecting to Cloudflare...</span>
+          </div>
+
+          <div id="tunnelUrlBox" class="hidden" style="margin-top: 12px; background: rgba(0,0,0,0.5); border: 1px dashed var(--gold-primary); border-radius: var(--radius-sm); padding: 10px 14px; display: flex; align-items: center; justify-content: space-between; gap: 12px;">
+            <div style="overflow: hidden;">
+              <span style="font-size: 10.5px; color: var(--gold-bright); display: block; font-weight: 700;">YOUR PUBLIC CLOUD URL:</span>
+              <a id="tunnelLiveLink" href="#" target="_blank" style="color: var(--cyan-bright); font-weight: 700; font-size: 13px; text-decoration: underline; word-break: break-all;"></a>
+            </div>
+            <button type="button" class="btn-secondary" id="copyTunnelLinkBtn" style="font-size: 11px; padding: 6px 12px; white-space: nowrap;">📋 Copy Link</button>
+          </div>
+        </div>
+
+        <div class="modal-actions">
+          <button type="button" class="btn-ghost" id="cancelSettingsBtn">Cancel</button>
+          <button type="submit" class="btn-primary">Save Settings</button>
+        </div>
+      </form>
+    </div>
+  </div>
+
+  <!-- Admin ID & Password Authentication Modal -->
+  <div class="modal-backdrop hidden" id="adminAuthModal">
+    <div class="modal-box" style="max-width: 390px; text-align: center;">
+      <div class="modal-header" style="justify-content: center; position: relative;">
+        <h3 style="font-size: 16px; color: var(--gold-bright);">🔐 Settings Admin Login</h3>
+        <button type="button" class="btn-close" id="closeAdminAuthBtn" style="position: absolute; right: 0;">&times;</button>
+      </div>
+      <form id="adminAuthForm" style="padding: 16px 4px 8px 4px;">
+        <div style="font-size: 42px; margin-bottom: 8px;">🛡️</div>
+        <p id="adminAuthPromptMsg" style="font-size: 13px; color: var(--text-secondary); margin-bottom: 14px;">
+          Enter <strong>Admin ID &amp; Password</strong> to access Settings &amp; Credentials.
+        </p>
+        <div class="form-group" style="text-align: left; margin-bottom: 12px;">
+          <label for="authUsernameInput" style="font-size: 12px; font-weight: 700; color: var(--gold-bright);">Admin ID / Username</label>
+          <input type="text" id="authUsernameInput" placeholder="Enter Admin ID (default: admin)" style="width: 100%; font-size: 15px; padding: 10px 14px;" autocomplete="username" required>
+        </div>
+        <div class="form-group" style="text-align: left; margin-bottom: 8px;">
+          <label for="authPasswordInput" style="font-size: 12px; font-weight: 700; color: var(--gold-bright);">Password</label>
+          <input type="password" id="authPasswordInput" placeholder="Enter Password (default: admin)" style="width: 100%; font-size: 15px; padding: 10px 14px;" autocomplete="current-password" required>
+        </div>
+        <p id="adminAuthError" class="hidden" style="color: var(--red-accent); font-size: 12px; margin-top: 6px; font-weight: 700;">
+          ❌ Incorrect Admin ID or Password.
+        </p>
+        <div style="display: flex; gap: 10px; margin-top: 16px;">
+          <button type="button" class="btn-ghost" id="cancelAdminAuthBtn" style="flex: 1;">Cancel</button>
+          <button type="submit" class="btn-primary" id="submitAdminAuthBtn" style="flex: 1;">🔓 Login &amp; Open</button>
+        </div>
+        <small style="display: block; margin-top: 12px; color: var(--text-muted); font-size: 11px;">
+          Default: <code>admin</code> / <code>admin</code> (Can be changed inside Settings)
+        </small>
+      </form>
+    </div>
+  </div>
+
+  <!-- Floating Animated Toast Notification Container -->
+  <div class="toast-container" id="toastContainer"></div>
+
+  <!-- 3D Graphics Engine & Application Scripts -->
+  <script src="/static/js/three.min.js"></script>
+  <script src="/static/js/3d_scene.js?v=5.0"></script>
+  <script src="/static/js/app.js?v=5.0"></script>
+</body>
+</html>
+
