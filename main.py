@@ -108,6 +108,11 @@ class VerifyAdminAuthRequest(BaseModel):
     password: str
 
 
+@app.get("/healthz")
+@app.get("/health")
+async def healthz():
+    return {"status": "healthy", "service": "Arceus Review Fetcher"}
+
 @app.get("/", response_class=HTMLResponse)
 async def home(request: Request):
     settings = {
