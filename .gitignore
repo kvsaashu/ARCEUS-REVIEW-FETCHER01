@@ -12,12 +12,11 @@ cloudflared.exe
 *.png
 *.jpg
 scratch/
-.system_generated/
 debug_*.py
 inspect_*.py
 find_*.py
 scratch_*.py
-screenshot_ui.py
+screenshot_*.py
 test_*.png
 after_*.png
 direct_*.png

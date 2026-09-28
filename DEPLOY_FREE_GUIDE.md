@@ -30,9 +30,9 @@ Render par free web service milti hai jisme aapka dashboard **24/7 live** rahega
    - **Build Command:** `pip install -r requirements.txt`
    - **Start Command:** `uvicorn main:app --host 0.0.0.0 --port $PORT`
    - **Instance Type:** **Free ($0/month)**
-5. **Environment Variables** (Render Dashboard Settings me):
-   - `TELEGRAM_BOT_TOKEN`: `your_bot_token_here` (from @BotFather)
-   - `TELEGRAM_CHAT_ID`: `your_chat_id_here`
+5. **Environment Variables** (Optional Settings me):
+   - `TELEGRAM_BOT_TOKEN`: `8630641097:AAHs7YiHtjiCmMvy3uOdEcfM5fe8Sz-OFSU`
+   - `TELEGRAM_CHAT_ID`: `7410556962`
 6. Click **"Deploy Web Service"**!
 
 🎉 **Result:** 2 minute ke andar aapko ek **Permanent Live Link** mil jayegi (e.g. `https://arceus-fetcher.onrender.com`). Is link ko aap aur aapki team duniya ke kisi bhi phone ya browser se access kar sakti hai!
